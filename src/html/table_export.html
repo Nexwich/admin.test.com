@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Массовая отгрузка</title>
+
+  <link href="../../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<section class="container">
+  <header class="row mb-4">
+    <div class="col">
+      <h1>Массовая отгрузка</h1>
+
+      <form action="">
+        <div class="mb-3">
+          <label for="query" class="form-label">Режим ТК</label>
+
+          <select id="query" class="form-select" name="query">
+            <option value="">СДЭК (СРТ РФ)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary">Сформировать список</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="row">
+    <div class="col">
+      <table class="table">
+        <thead>
+          <tr class="table-secondary">
+            <th>Тип</th>
+            <th>Код</th>
+            <th>Клиент</th>
+            <th>Номер УПД</th>
+            <th>Дата УПД</th>
+            <th>Мест</th>
+            <th>Вес, кг</th>
+            <th>Объемм, см<sup>3</sup></th>
+            <th>ТН</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="text-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <td>Счет</td>
+            <td>123456</td>
+            <td>ООО «Клиент»</td>
+            <td>12345</td>
+            <td>26.04.2022</td>
+            <td>2</td>
+            <td>4</td>
+            <td>200</td>
+            <td>23432525</td>
+          </tr>
+
+          <tr class="text-warning">
+            <td>Счет</td>
+            <td>123456</td>
+            <td>ООО «Клиент»</td>
+            <td>12345</td>
+            <td>26.04.2022</td>
+            <td>2</td>
+            <td>4</td>
+            <td>200</td>
+            <td>23432525</td>
+          </tr>
+
+          <tr>
+            <td>Счет</td>
+            <td>123456</td>
+            <td>ООО «Клиент»</td>
+            <td>12345</td>
+            <td>26.04.2022</td>
+            <td>2</td>
+            <td>4</td>
+            <td>200</td>
+            <td>23432525</td>
+          </tr>
+        </tbody>
+
+        <tfoot>
+          <tr>
+            <td colspan="5">Итого: 6 отправок</td>
+            <td>15 мест</td>
+            <td>111 кг</td>
+            <td>3.4 м<sup>3</sup></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <footer class="row">
+    <div class="col-auto me-auto">
+      <div class="text-danger">Все места не габаритные</div>
+      <div class="text-warning">Некоторые места не габаритные</div>
+    </div>
+
+    <div class="col-auto">
+      Общий вес при взвешивании:
+      <label><input class="form-control" value="112"></label>
+      кг
+      <button class="btn btn-primary">Отгрузить</button>
+    </div>
+  </footer>
+</section>
+
+<div class="modal" tabindex="-1" id="exampleModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Массогабариты: Счет 123456</h5>
+      </div>
+
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr class="table-secondary">
+              <th>Место</th>
+              <th>Упаковка</th>
+              <th>Вес, кг</th>
+              <th>Ширина, см</th>
+              <th>Высота, см</th>
+              <th>Гулбина, см</th>
+              <th>Объем, см<sup>3</sup></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>Место</td>
+              <td>Упаковка</td>
+              <td>Вес, кг</td>
+              <td>Ширина, см</td>
+              <td>Высота, см</td>
+              <td>Гулбина, см</td>
+              <td>Объем, см<sup>3</sup></td>
+            </tr>
+            <tr>
+              <td>Место</td>
+              <td>Упаковка</td>
+              <td>Вес, кг</td>
+              <td>Ширина, см</td>
+              <td>Высота, см</td>
+              <td>Гулбина, см</td>
+              <td>Объем, см<sup>3</sup></td>
+            </tr>
+            <tr>
+              <td>Место</td>
+              <td>Упаковка</td>
+              <td>Вес, кг</td>
+              <td>Ширина, см</td>
+              <td>Высота, см</td>
+              <td>Гулбина, см</td>
+              <td>Объем, см<sup>3</sup></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
