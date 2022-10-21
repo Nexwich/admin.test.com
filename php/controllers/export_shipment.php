@@ -17,7 +17,7 @@ class Controller_export_shipment extends Controller_Base {
       $get_role = new Get_role($this->registry, 'TradeTestRAV');
       $storage = new Storage($this->registry, 'TradeTestRAV');
       $shipment_documents = new Shipment_Documents($this->registry, 'TradeTestRAV');
-      $operators = $get_role->get_id('192.168.0.158'); //$_SERVER['REMOTE_ADDR']);
+      $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
       $operator = $operators[0];
       $storage_id = $storage->get_id_by_operator_id((int) $operator['КодОператора']);
 
@@ -78,7 +78,7 @@ class Controller_export_shipment extends Controller_Base {
   public function submit () {
     $shipment_documents = new Shipment_Documents($this->registry, 'TradeTestRAV');
     $get_role = new Get_role($this->registry, 'TradeTestRAV');
-    $operators = $get_role->get_id('192.168.0.158'); // $_SERVER['REMOTE_ADDR']);
+    $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
     $operator = $operators[0];
 
     $result = $shipment_documents->shipment([
