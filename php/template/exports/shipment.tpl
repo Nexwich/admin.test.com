@@ -56,6 +56,7 @@ $total_places += (int) $item['КолМест'];
 
   <div class="col">
     <div class="card card mx-2" style="height: calc(94vh);">
+      <? if (!empty($delivery_companies)) { ?>
       <div class="card-header px-2 py-0">
         <form action="" method="get">
           <input type="hidden" name="mode" value="export">
@@ -85,9 +86,10 @@ $total_places += (int) $item['КолМест'];
           </div>
         </form>
       </div>
+      <? } ?>
 
-      <? if (!empty($_GET['mode']) and $_GET['mode'] == 'export' and $total_items) { ?>
       <? if (empty($items['КодОшибки'])) { ?>
+      <? if (!empty($_GET['mode']) and $_GET['mode'] == 'export' and $total_items) { ?>
       <div class="card-body">
         <form action="/export_shipment/submit" method="post" target="_blank">
           <input type="hidden" name="delivery_company_code" value="<?= $_GET['delivery_company_code'] ?>">
@@ -209,7 +211,7 @@ $total_places += (int) $item['КолМест'];
           </table>
         </form>
       </div>
-      <? } elseif ($items['КодОшибки']) { ?>
+      <? } elseif (!empty($items['КодОшибки'])) { ?>
       <div class="card-header">
         <div class="mt-2 mb-2">
           <p><?= $items['КодОшибки'] ?>. <?= $items['ОписаниеОшибки'] ?></p>

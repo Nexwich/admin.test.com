@@ -3,22 +3,31 @@
 /**
  * Выгрузка массовой отгрузки
  * @author Александр Панасин <nexwich@mail.ru>
- * @version 1.0.0
+ * @version 1.1.0
  */
 class Controller_export_shipment extends Controller_Base {
   public function index () {
-    $delivery_companies = new Delivery_Companies($this->registry, 'TradeTestRAV');
+    $get_role = new Get_role($this->registry, 'TradeTestRAV');
+    $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
+    $operator = array_shift($operators);
+
+    if (empty($operator['КодОператора'])) {
+      $params['tag_title'] = 'Нет доступа';
+      $params['ip'] = $_SERVER['REMOTE_ADDR'];
+      $this->render('system/noRole', $params);
+
+      return;
+    }
 
     $params['tag_title'] = 'Массовая отгрузка';
-    $params['delivery_companies'] = $delivery_companies->getItems();
     $params['items'] = [];
 
+    $delivery_companies = new Delivery_Companies($this->registry, 'TradeTestRAV');
+    $params['delivery_companies'] = $delivery_companies->getItems();
+
     if (!empty($_GET['delivery_company_code'])) {
-      $get_role = new Get_role($this->registry, 'TradeTestRAV');
       $storage = new Storage($this->registry, 'TradeTestRAV');
       $shipment_documents = new Shipment_Documents($this->registry, 'TradeTestRAV');
-      $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
-      $operator = $operators[0];
       $storage_id = $storage->get_id_by_operator_id((int) $operator['КодОператора']);
 
       $shipment_documents = $shipment_documents->getItems([
@@ -47,6 +56,18 @@ class Controller_export_shipment extends Controller_Base {
   }
 
   public function document () {
+    $get_role = new Get_role($this->registry, 'TradeTestRAV');
+    $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
+    $operator = array_shift($operators);
+
+    if (empty($operator['КодОператора'])) {
+      $params['tag_title'] = 'Нет доступа';
+      $params['ip'] = $_SERVER['REMOTE_ADDR'];
+      $this->render('system/noRole', $params);
+
+      return;
+    }
+
     $shipment_masses = new Shipment_Masses($this->registry, 'TradeTestRAV');
 
     $params['tag_title'] = 'Массовая отгрузка';
@@ -76,11 +97,19 @@ class Controller_export_shipment extends Controller_Base {
   }
 
   public function submit () {
-    $shipment_documents = new Shipment_Documents($this->registry, 'TradeTestRAV');
     $get_role = new Get_role($this->registry, 'TradeTestRAV');
     $operators = $get_role->get_id($_SERVER['REMOTE_ADDR']);
-    $operator = $operators[0];
+    $operator = array_shift($operators);
 
+    if (empty($operator['КодОператора'])) {
+      $params['tag_title'] = 'Нет доступа';
+      $params['ip'] = $_SERVER['REMOTE_ADDR'];
+      $this->render('system/noRole', $params);
+
+      return;
+    }
+
+    $shipment_documents = new Shipment_Documents($this->registry, 'TradeTestRAV');
     $result = $shipment_documents->shipment([
       'UserID' => $operator['КодОператора'],
       'TotalWeight' => (float) str_replace(',', '.', $_POST['mass']),
