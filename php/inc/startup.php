@@ -7,7 +7,7 @@
 
 include('debug.php');
 
-if (version_compare(phpversion(), '5.1.0', '<') == true) { die('Ошибка: Версия PHP не соотвествует необходимой (слишком старая)'); }
+if (version_compare(phpversion(), '5.1.0', '<') == true) { die ('Ошибка: Версия PHP не соответствует необходимой (слишком старая)'); }
 
 //----------------------------------------------------
 // Настройки:
@@ -32,49 +32,52 @@ define('SITE_PATH', $site_path);
 define('SITE_URL', isset($_SERVER['HTTPS']) ? 'https://' : 'http://' . $_SERVER['SERVER_NAME'].'/');
 
 // 4. Версионирование скриптов (для автоочистки в кэше браузеров)
-define('VERSION_SITE', 2134);
+define('VERSION_SITE', 1498);
 
 // 5. Путь хранилища временных файлов
-define('SITE_FILES_TEMP', '/var/www/html/admin.test/tmp/');
+define('SITE_FILES_TEMP', '/var/www/html/admin/tmp/');
+
+// 5а. Путь к папке сайта, подключенному к admin.local.com
+define('SITE_URL_ADMIN_PATH', '/var/www/html/totalkip');
 
 // 6. Путь к хранилищу изображений направлений и категорий
-define('SITE_IMG_CAT_PATH', '/var/www/html/totalkip.test.com/img/category/');
+define('SITE_IMG_CAT_PATH', SITE_URL_ADMIN_PATH.'/img/category/');
 
 // 7. Путь к хранилищу изображений направлений и категорий в описаниях
-define('SITE_IMG_CAT_DESC_PATH', '/var/www/html/totalkip.test.com/img/category/desc/');
+define('SITE_IMG_CAT_DESC_PATH', SITE_URL_ADMIN_PATH.'/img/category/desc/');
 
 // 8. Путь к хранилищу изображений контента
-define('SITE_IMG_CONTENT_PATH', '/var/www/html/totalkip.test.com/img/content/');
+define('SITE_IMG_CONTENT_PATH', SITE_URL_ADMIN_PATH.'/img/content/');
 
-// 9. Путь к хранилищу изображений ,баннера
-define('SITE_IMG_BANNER_PATH', '/var/www/html/totalkip.test.com/img/info/');
+// 9. Путь к хранилищу изображений баннера
+define('SITE_IMG_BANNER_PATH', SITE_URL_ADMIN_PATH.'/img/banner/');
 
 // 10. Путь к хранилищу изображений направлений и категорий (внешняя ссылка)
-define('SITE_IMG_CAT_PATH_URL', 'http://totalkip.test.com/img/category/');
+define('SITE_IMG_CAT_PATH_URL', 'https://totalkip.ru/img/category/');
 
 // 11. Путь к хранилищу изображений направлений и категорий в описаниях (внешняя ссылка)
-define('SITE_IMG_CAT_DESC_PATH_URL', 'http://totalkip.test.com/img/category/desc/');
+define('SITE_IMG_CAT_DESC_PATH_URL', 'https://totalkip.ru/img/category/desc/');
 
 // 12. Путь к хранилищу изображений контента (внешняя ссылка)
-define('SITE_IMG_CONTENT_PATH_URL', 'http://totalkip.test.com/img/content/');
+define('SITE_IMG_CONTENT_PATH_URL', 'https://totalkip.ru/img/content/');
 
 // 13. Путь к хранилищу изображений баннера (внешняя ссылка)
-define('SITE_IMG_BANNER_PATH_URL', 'http://totalkip.test.com/img/info/');
+define('SITE_IMG_BANNER_PATH_URL', 'https://totalkip.ru/img/banner/');
 
-// 14. Путь к сайту, подключенному к admin.test.com
-define('SITE_URL_ADMIN', 'totalkip.test.com');
+// 14. Путь к сайту, подключенному к admin.local.com
+define('SITE_URL_ADMIN', 'totalkip.ru');
 
 // 15. Путь к хранилищу документов контента
-define('SITE_DOCS_CONTENT_PATH', '/var/www/html/totalkip.test.com/docs/content/');
+define('SITE_DOCS_CONTENT_PATH', SITE_URL_ADMIN_PATH.'/docs/content/');
 
 // 16. Путь к хранилищу изображений контента (внешняя ссылка)
-define('SITE_DOCS_CONTENT_PATH_URL', 'http://totalkip.test.com/docs/content/');
+define('SITE_DOCS_CONTENT_PATH_URL', 'https://totalkip.ru/docs/content/');
 
 // 17. Путь к хранилищу изображений типов (групп товаров)
-define('SITE_IMG_TYPES_PATH', '/var/www/html/totalkip.test.com/img/type/');
+define('SITE_IMG_TYPES_PATH', SITE_URL_ADMIN_PATH.'/img/type/');
 
 // 18. Путь к хранилищу изображений типов (групп товаров) (внешняя ссылка)
-define('SITE_IMG_TYPES_PATH_URL', 'http://totalkip.test.com/img/type/');
+define('SITE_IMG_TYPES_PATH_URL', 'https://totalkip.ru/img/type/');
 
 // 19. Загрузка классов "на лету"
 spl_autoload_register(function ($class) {
@@ -85,18 +88,13 @@ spl_autoload_register(function ($class) {
 				return;
 		}else{
 			$model = SITE_PATH . 'models' . DIRSEP . $filename;
-			if (file_exists($model)){
-				include ($model);
-				return;
-			} else {
-				$exception = SITE_PATH . 'exceptions' . DIRSEP . $filename;
-				if (file_exists($exception) == false)	return false;
-				include ($exception);
-			}
+			if (file_exists($model) == false) return false;
+			include ($model);
 		}
 });
 
 require __DIR__ . '/../traits/procedure.php';
+require __DIR__ . '/../traits/find.php';
 
 // 20. Выполнение событий для каждой страницы - попытка подключиться к БД
 $registry = new Registry;
@@ -104,6 +102,9 @@ start();
 
 // 21. HASH для Старикова на допуск генерации долгосрочных договоров
 define('ALLOW_GEN_DOG', '05085604-92BB-4D29-B33B-845539C39585');
+
+// 22. URL web-сервер
+define('URL_WEB_SERVER', 'http://192.168.0.130');
 
 //----------------------------------------------------
 // Функции
@@ -198,9 +199,6 @@ function strip_selected_tags($text, $tags = array())
 */
 function upload_file($name_tag, $new_name_file, $destination, $ext)
 {
-	/*
-	Производится запись через промежуточную папку admin/tmp, из-за сложностей с правми записи напрямую в папку назначения
-	*/
 	$dest1 = SITE_FILES_TEMP.$_FILES[$name_tag]["name"];
 	$move1 = move_uploaded_file($_FILES[$name_tag]["tmp_name"], $dest1);
 
@@ -302,6 +300,97 @@ function pagination($total, $now_page, $amount, $url, $get = 'lim')
 }
 
 /*!
+	@brief Создание пагинации страниц без перезагрузки всей страницы целиком
+	@details Создание пагинации страниц без перезагрузки всей страницы целиком
+	@param integer $total Всего записей
+	@param integer $now_page Текущая страница
+	@param integer $amount Количество записей на странице
+	@param string $name Идентификатор пагинации (для возможности создания нескольких пагинаций на одной странице)
+	@return html-разметка с пагинацией страниц
+*/
+function pagination_js($total, $now_page, $amount, $name)
+{
+	$total = ceil($total/$amount)-1; // всего страниц
+	$now_page++;
+
+	$rtn = '';
+
+	// Пагинация появится если есть более 1 страницы
+	if($total >= 1)
+	{
+		$rtn.= '<center><nav class="col-sm-12"><ul class="pagination">';
+			if($total >= 7 )
+			{
+				if($total-$now_page > 2)
+				{
+					// клавиши пагинации
+					$now_page--;
+					if(($now_page)>0)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', 0);"><i class="fa fa-arrow-left"></i></a></li>';
+
+					if(($now_page)!=0)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($now_page-1).');">'.($now_page).'</a></li>';
+
+					$rtn.= '<li class="active"><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.$now_page.');">'.($now_page+1).'</a></li>';
+
+					if(($total)-($now_page)>0)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($now_page+1).');">'.($now_page+2).'</a></li>';
+
+					if((($total-1)-($now_page+1))>1)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($now_page+2).');">'.($now_page+3).'</a></li>';
+
+					if((($total-1)-($now_page+1))>1 && $now_page+3!=$total-1)
+					$rtn.= '<li><a>&hellip;</a></li>';
+
+					if(($total-1)-($now_page+1)>0)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($total-1).');">'.($total).'</a></li>';
+
+					if(($total)-($now_page+1)>0)
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($total).');">'.($total+1).'</a></li>';
+
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($total).')"><i class="fa fa-arrow-right"></i></a></li>';
+				}
+				else
+				{
+					$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', 0);"><i class="fa fa-arrow-left"></i></a></li>';
+
+					for($i=$total-5;$i<=$total; $i++) $rtn.= '<li class="'.($i+1==$now_page?'active':'').'"><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($i).');">'.($i+1).'</a></li>';
+
+					if($now_page!=$total+1) $rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($total).');"><i class="fa fa-arrow-right"></i></a></li>';
+				}
+			}
+			else
+			{
+				if(($now_page)!=1)
+				$rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', 0);"><i class="fa fa-arrow-left"></i></a></li>';
+
+				for($i=0;$i<=$total; $i++) $rtn.= '<li class="'.($i+1==$now_page?'active':'').'"><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($i).');">'.($i+1).'</a></li>';
+
+				if($now_page!=$total+1) $rtn.= '<li><a style="cursor: pointer" onclick="gotoPage(\''.$name.'\', '.($total).');"><i class="fa fa-arrow-right"></i></a></li>';
+			}
+		$rtn.= '</ul></nav></center>';
+	}
+	return $rtn;
+}
+
+/*!
+	@brief Обработка ошибок при работе с БД и выдача дебага пользователю
+	@details Обработка ошибок при работе с БД и выдача дебага пользователю
+*/
+function debug_db_error($debug_msg = '')
+{
+	global $registry;
+	// Генерация уникального GUID с ошибкой
+	$GUID = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+	$template = new Template($registry);
+	$registry->set('template', $template);
+	file_put_contents('errors_db.txt', 'Произошла ошибка при работе с БД в '.$debug_msg.' | GUID ошибки: '.$GUID.' | Дата: '.date('d.m.Y H:i:s').' | '.'IP:'.$_SERVER['REMOTE_ADDR']."\r\n", FILE_APPEND);
+	$registry['template']->set('GUID', $GUID);
+	$registry['template']->show('503', 'system');
+	exit;
+}
+
+/*!
 	@brief Стартовая функция движка
 	@details Стартовая функция движка (подключение к БД, генерация и валидация cookie для корзины)
 */
@@ -313,88 +402,6 @@ function start()
 	try
 	{
 		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		// $db = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestTotalkipF", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_InternetAcquiring", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('db', $db);
-
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$BaseGTD = new PDO("sqlsrv:Server=192.168.0.43;Database=Trade_RU_1C83", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$BaseGTD->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$BaseGTD->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('BaseGTD', $BaseGTD);
-	}
-	catch(PDOException $e)
-	{
-		$BaseGTD = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$Library = new PDO("sqlsrv:Server=192.168.0.43;Database=Library", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$Library->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$Library->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('Library', $Library);
-	}
-	catch(PDOException $e)
-	{
-		$BaseGTD = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$db2 = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestStudents", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('db_2', $db2);
-	}
-	catch(PDOException $e)
-	{
-		$db2 = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$db3 = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestTVS", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db3->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db3->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('db_3', $db3);
-	}
-	catch(PDOException $e)
-	{
-		$db3 = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$zae = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestZAE", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$zae->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$zae->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('ZAE', $zae);
-	}
-	catch(PDOException $e)
-	{
-		$zae = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
 		$TradeTest2 = new PDO("sqlsrv:Server=192.168.0.44;Database=TradeTest2", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
 		$TradeTest2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		$TradeTest2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -403,20 +410,20 @@ function start()
 	catch(PDOException $e)
 	{
 		$TradeTest2 = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
+		debug_db_error(__FILE__.' - '.__LINE__);
 	}
 
 	try
 	{
 		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestDebriefing = new PDO("sqlsrv:Server=192.168.0.43;Database=Trade_RU_1C83", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestDebriefing->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestDebriefing->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestDebriefing', $TradeTestDebriefing);
+		$Library = new PDO("sqlsrv:Server=192.168.0.44;Database=Library", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
+		$Library->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$Library->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$registry->set('Library', $Library);
 	}
 	catch(PDOException $e)
 	{
-		$TradeTestDebriefing = false;
+		$BaseGTD = false;
 		exit(__FUNCTION__.' Err_text: '.$e);
 	}
 
@@ -433,253 +440,15 @@ function start()
 		$TradeTestRAV = false;
 		exit(__FUNCTION__.' Err_text: '.$e);
 	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestIncomes = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestIncomes", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestIncomes->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestIncomes->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestIncomes', $TradeTestIncomes);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestIncomes = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestBTA = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTest_BTA", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestBTA->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestBTA->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestBTA', $TradeTestBTA);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestBTA = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestFR = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestForreplace", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestFR->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestFR->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestFR', $TradeTestFR);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestFR = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$Tradetest_KashServer = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_KashServer", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$Tradetest_KashServer->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$Tradetest_KashServer->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('Tradetest_KashServer', $Tradetest_KashServer);
-	}
-	catch(PDOException $e)
-	{
-		$Tradetest_KashServer = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$db = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_InternetAcquiring", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestF', $db);
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	//временно
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$db = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_InternetAcquiring2", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestF2', $db);
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$KS2 = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_KashServer2", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$KS2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$KS2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('KS2', $KS2);
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$IA = new PDO("sqlsrv:Server=192.168.0.43;Database=Tradetest_InternetAcquiring", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$IA->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$IA->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('IA', $IA);
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$db = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestCalcState", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('CalcState', $db);
-	}
-	catch(PDOException $e)
-	{
-		$db = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	// try
-	// {
-	// 	$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-	// 	$TradeTestZVY = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestZVY", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-	// 	$TradeTestZVY->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-	// 	$TradeTestZVY->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	// 	$registry->set('TradeTestZVY', $TradeTestZVY);
-	// }
-	// catch(PDOException $e)
-	// {
-	// 	$TradeTestZVY = false;
-	// 	exit(__FUNCTION__.' Err_text: '.$e);
-	// }
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestAS = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestAS", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestAS->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestAS->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestAS', $TradeTestAS);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestAS = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestAS2 = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestAS2", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestAS2->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestAS2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestAS2', $TradeTestAS2);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestAS2 = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTest2_2609 = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTest2_2609", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTest2_2609->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTest2_2609->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTest2_2609', $TradeTest2_2609);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTest2_2609 = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestRAVBuild = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestRAVBuild", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestRAVBuild->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestRAVBuild->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestRAVBuild', $TradeTestRAVBuild);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestRAVBuild = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeTestRAVBackup = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeTestRAVBackup", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeTestRAVBackup->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeTestRAVBackup->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeTestRAVBackup', $TradeTestRAVBackup);
-	}
-	catch(PDOException $e)
-	{
-		$TradeTestRAVBackup = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$Trade_Attributes = new PDO("sqlsrv:Server=192.168.0.43;Database=Trade_Attributes", 'gph_attr', 'b2433fd6f', $options); //Подключаемся к базе
-		$Trade_Attributes->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$Trade_Attributes->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('Trade_Attributes', $Trade_Attributes);
-	}
-	catch(PDOException $e)
-	{
-		$Trade_Attributes = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
-
-	try
-	{
-		$options = array(PDO::SQLSRV_ATTR_ENCODING=>PDO::SQLSRV_ENCODING_UTF8, "CharacterSet" => "UTF-8", PDO::ATTR_TIMEOUT => 5);
-		$TradeLogs = new PDO("sqlsrv:Server=192.168.0.43;Database=TradeLogs", 'sa', '7vz54xmm4ev2', $options); //Подключаемся к базе
-		$TradeLogs->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$TradeLogs->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$registry->set('TradeLogs', $TradeLogs);
-	}
-	catch(PDOException $e)
-	{
-		$TradeLogs = false;
-		exit(__FUNCTION__.' Err_text: '.$e);
-	}
 }
 
 session_save_path();
 session_start();
 $ip_adress = $_SERVER['REMOTE_ADDR'];
-$get_role = new Get_role($registry,'db');
+$get_role = new Get_role($registry,'TradeTest2');
 $auth = $get_role->get_id($ip_adress);
+$_SESSION['ip_adress']=$ip_adress;
 if (isset($auth[0]['УчетнаяЗапись']))
 	$_SESSION['user']=$auth[0]['УчетнаяЗапись'];
-else $_SESSION['user']='Гость'
+else $_SESSION['user']='Гость';
 ?>

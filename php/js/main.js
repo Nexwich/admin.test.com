@@ -1,45 +1,4 @@
-// Общий Ява-Скрипт
-var main = {
-
-	//Получение значение cookie
-	getcookie: function(name){
-		var matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"));
-		return matches ? decodeURIComponent(matches[1]) : undefined;
-	},
-	//Установка значения cookie
-	setcookie: function(name, value, options){
-		options = options || {};
-		var expires = options.expires;
-
-		if (typeof expires == "number" && expires)
-		{
-			var d = new Date();
-			d.setTime(d.getTime() + expires * 1000);
-			expires = options.expires = d;
-		}
-
-		if(expires && expires.toUTCString)
-		{
-			options.expires = expires.toUTCString();
-		}
-
-		value = encodeURIComponent(value);
-		var updatedCookie = name + "=" + value;
-
-		for(var propName in options)
-		{
-			updatedCookie += "; " + propName;
-			var propValue = options[propName];
-			if(propValue !== true)
-			{
-				updatedCookie += "=" + propValue;
-			}
-		}
-		document.cookie = updatedCookie;
-	}
-}
-
-/*jQuery.stringify = (function ($) {
+jQuery.stringify = (function ($) {
   var _PRIMITIVE, _OPEN, _CLOSE;
   if (window.JSON && typeof JSON.stringify === "function")
     return JSON.stringify;
@@ -99,20 +58,31 @@ var main = {
     //obj is array or object
     return toJson(obj, type);
   }
-}(jQuery));*/
+}(jQuery));
 
 //Локали для интерфейса
 strings = {
 	'error_connect' : 'Ошибка. Возможно отсутствует сетевое соединение',
 	'load_data': '<div class="wait_response"><span class="mute"><i class="fa fa-spinner fa-pulse" id="loadimg"></i></span></div>',
 	'load_data_process' : '<i class="fa fa-spinner fa-pulse" id="loadimg"></i> Обработка',
+	'cat_success_edit' : 'Успешно отредактирована категория/направление',
+	'cat_success_add' : 'Успешно добавлена новая категория/направление',
+	'cat_success_attach_product' : 'Привязка товара к категории успешно выполнена',
+	'cat_success_attach_family' : 'Привязка семейства к категории успешно выполнена',
+	'cat_success_attach_group' : 'Групповая привязка успешно выполнена',
+	'cat_success_dup_select_main_cat' : 'Для данного или семейства эта категория уже является главной',
+	'cat_success_select_main_cat_fam' : 'Для данного семейства категория успешно выбрана как главная',
+	'cat_success_select_main_cat_prod' : 'Для данного товара категория успешно выбрана как главная',
+	'cat_process_attach' : 'Выполняется привязка семейс/товаров к категории...',
+	'cat_error_attach' : 'Ошибка привязки. Обновите страницу и попробуйте снова',
+	'dupl_url_cat' : 'Такой URL уже имеется в данном направлении или списке направлений. Введите другое URL для SEO',
 	'upload_error_100' : 'Ошибка загрузки файла, попробуйте отправить форму повторно',
 	'upload_error_101' : 'Ошибка загрузки файла, попробуйте отправить форму повторно',
 	'upload_error_102' : 'Формат не соответствует установленному!',
 	'new_family_header' : 'Создание семейства',
 	'new_family_button' : 'Добавить семейство',
 	'edit_family_header' : 'Редактирование семейства',
-	'edit_family_button' : '<i class="fa fa-floppy-o"></i> Сохранить изменения',
+	'edit_family_button' : 'Сохранить изменения',
 	'fam_success_add' : 'Успешно добавлено новое семейство',
 	'fam_success_edit' : 'Успешно отредактировано семейство',
 	'fam_error_dupl_name' : 'Для данной группы товаров уже имеется семейство с таким именем',
@@ -131,17 +101,9 @@ strings = {
 	'fam_group_operation_header_6' : 'Удаление привязки выбранных товаров',
 	'fam_group_operation_7' : 'Создайте новое семейство или привяжите товары к существующему семейству.',
 	'fam_group_operation_header_7' : 'Привязка выбранных товаров к другому семейству',
-	'fam_group_operation_8' : 'Выберите из списка группу товаров, к которой будут привязаны товары. При этом будет удалена текущая связь выбранных товаров и семейства.',
-	'fam_group_operation_header_8' : 'Перемещение выбранных товаров в группу товаров',
-	'fam_group_operation_9' : 'Выберите из списка группу товаров, к которой будут привязаны товары.',
-	'fam_group_operation_header_9' : 'Перемещение выбранных товаров в группу товаров',
-	'fam_group_operation_10' : 'Выберите из списка группу товаров, к которой будут привязаны семейства и входящие в них товары.',
-	'fam_group_operation_header_10' : 'Перемещение выбранных семейств в группу товаров',
 	'fam_error_operation': 'Ошибка групповой операции',
-	'fam_list_open' : '<i class="fa fa-plus-square-o"></i> Раскрыть семейства',
-	'fam_list_close' : '<i class="fa fa-minus-square-o"></i> Свернуть семейства',
-	'edit_discount_header' : 'Редактирование скидки',
-	'discount_group_cant_be_deleted' : 'Группа скидок не может быть удалена',
+	'fam_list_open' : '<i class="fa fa-plus-square-o" aria-hidden="true"></i> Раскрыть семейства',
+	'fam_list_close' : '<i class="fa fa-minus-square-o" aria-hidden="true"></i> Свернуть семейства'
 };
 
 //Создание блока с оповещением на Bootstrap
@@ -150,9 +112,94 @@ function create_alert_msg(msg_txt, type)
 	if(type == 1) var info = 'success';
 	else if(type == 0) var info = 'danger';
 	else if(type == 2) var info = 'info';
-	/* veu@ 14-02-2019 слишком большие алерты, надо проще
-	return '<div class="alert alert-'+info+' alert-dismissable"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>'+msg_txt+'</strong></div>';*/
 	return '<div class="text-'+info+'"><small>'+msg_txt+'</small></div>';
+};
+
+// Сохранение формы с основными настройками категории/направления
+function save_main_form()
+{
+	var data = new FormData();
+	data.append('name_cat', $("#name_cat").val());
+	data.append('image', $("#image")[0].files[0]);
+	data.append('image2', $("#image2")[0].files[0]);
+	data.append('image_url', $("#image_url").val());
+	data.append('image_url_desc', $("#image_url_desc").val());
+	data.append('id_root', $("#id_root").val());
+	data.append('sort', $("#sort").val());
+	data.append('on_off_cat', $("#on_off_cat").is(":checked"));
+	data.append('id_category', $("#id_category").val());
+	data.append('opisanie', $("#opisanie").val());
+	data.append('color', $("#color").val());
+	$('#form_category_main').find(':submit').attr('disabled','disabled');
+	$("#results").html('');
+	$.ajax({
+		url: '/structure/api_save_main_form',
+		data: data,
+		cache: false,
+		contentType: false,
+		processData: false,
+		method: 'POST',
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(obj.status == 1)
+			{
+				if(obj.text == 'cat_success_edit')
+				{
+					$("#results").html(create_alert_msg(strings[obj.text], 1));
+					setTimeout('location.reload()', 1000);
+				}
+				else if(obj.text == 'cat_success_add')
+				{
+					$("#results").html(create_alert_msg(strings[obj.text], 1));
+					setTimeout('location.replace("/structure/view?id='+obj.id+'")', 1000);
+				}
+			}
+			else
+			{
+				var name = 'upload_error_'+obj.status;
+				$("#results").html(create_alert_msg(strings[name], 0));
+			}
+		},
+		error:  function(xhr, str){
+			$("#results").html(create_alert_msg(strings['error_connect'], 0));
+			console.log("Error structure/api_save_main_form: " + xhr.status);
+		},
+		complete:  function (){
+			$('#form_category_main').find(':submit').removeAttr('disabled');
+		}
+	});
+};
+
+// Сохранение формы с SEO настройками категории/направления
+function save_seo_form()
+{
+	var msg = $("#form_category_seo").serialize();
+	$('#form_category_seo').find(':submit').attr('disabled','disabled');
+	$("#results2").html('');
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_save_seo_form",
+		data: msg,
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(obj.status == 1)
+			{
+				$("#results2").html(create_alert_msg(strings[obj.text], 1));
+				setTimeout('location.reload()', 1000);
+			}
+			else
+			{
+				$("#results2").html(create_alert_msg(strings[obj.text], 0));
+			}
+		},
+		error:  function(xhr, str){
+			$("#results2").html(create_alert_msg(strings['error_connect'], 0));
+			console.log("Error structure/api_save_seo_form: " + xhr.status);
+		},
+		complete:  function (){
+			$('#form_category_seo').find(':submit').removeAttr('disabled');
+		}
+	});
 };
 
 // Получение списка товаров, входящих в семейство
@@ -174,7 +221,7 @@ function family_list(id_family, block, sort = 1)
 
 	$.ajax({
 		type: "POST",
-		url: "/family/api_get_list_items",
+		url: "/db_family/api_get_list_items",
 		data: {id_family: id_family},
 		success: function(data) {
 			var obj = {item: $.parseJSON(data)};
@@ -219,7 +266,7 @@ function family_list(id_family, block, sort = 1)
 			}
 		},
 		error:  function(xhr, str){
-			console.log("Error family/api_get_list_items: " + xhr.status);
+			console.log("Error db_family/api_get_list_items: " + xhr.status);
 		}
 	});
 }
@@ -234,14 +281,205 @@ function family_change_priority_products(id_family, id_item, index)
 {
 	$.ajax({
 		type: "POST",
-		url: "/family/api_change_sort_items",
+		url: "/db_family/api_change_sort_items",
 		data: {id_family: id_family, id_item: id_item, index: index},
 		success: function(data) {
 			$("table tbody ul").sortable("enable");
 			$("table tbody").sortable("enable");
 		},
 		error:  function(xhr, str){
-			console.log("Error family/api_change_sort_items: " + xhr.status);
+			console.log("Error db_family/api_change_sort_items: " + xhr.status);
+		}
+	});
+}
+
+/*
+	Изменение индексов сортировки для товаров и семейств привязанных к категории/направлению
+	id_record - id записи в таблице Интернет_категории_семейства_товары с семейством или товаром
+	index - новое значение индекса сортировки
+*/
+function change_priority_fam_prod(id_record, index)
+{
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_change_sort_fam_items",
+		data: {id_record: id_record, index: index},
+		success: function(data) {
+			$("table tbody ul").sortable("enable");
+			$("table tbody").sortable("enable");
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_change_sort_fam_items: " + xhr.status);
+		}
+	});
+}
+
+// Удаление связи категории/направления с семействами и товарами
+function structure_del_relation(id_record)
+{
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_delete_relation",
+		data: {id_record: id_record},
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(obj.status == 1)
+			{
+				$("table tbody tr").find(`[data-element='${id_record}']`).off("click", ".del-relation");
+				$("table tbody").find(`[data-element='${id_record}']`).remove();
+			}
+			if(obj.status == -1)
+			{
+				var id_product = obj.id_product;
+				var name_product = obj.name_product;
+				var name_family = obj.name_family;
+				structure_select_main_category(id_product, name_product, name_family, 1);
+			}
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_delete_relation: " + xhr.status);
+		}
+	});
+}
+
+// Выборка возможностей присоединения товара или семейства к категории
+function structure_select_attach(id_product, id_category)
+{
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_select_attach",
+		data: {id_product: id_product, id_category: id_category},
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(parseInt(obj.id_family) > 0) obj.family_exist = true;
+			get_template( '/template/chunks/structure_product_attach.tpl', false);
+			$("#structure_good_add_modal").html(Mustache.render(templates['/template/chunks/structure_product_attach.tpl'], obj));
+			$(".family-list-attach").button().on("click", function() {
+				var self = $(this);
+				if(typeof self.data('family') != 'undefined')
+				{
+					var key = self.data('family');
+					family_list(key, '#family_list');
+				}
+			});
+			var name_family = obj.name_family;
+			var name_product = obj.name_product;
+			$(".attach-fam-product").button().on("click", function() {
+				$(".attach-fam-product").attr('disabled','disabled');
+				var var_attach = $("#select_var_attach:checked").val();
+				var id_family = $("#attach_id_family").val();
+				var id_product = $("#attach_id_product").val();
+				structure_change_attach(var_attach, id_product, id_family, name_product, name_family);
+			});
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_select_attach: " + xhr.status);
+		}
+	});
+}
+
+// Изменение привязки товаров и семейств к категории
+function structure_change_attach(var_attach, id_product, id_family, name_product, name_family, type = 0)
+{
+	var id_category = $("#id_category").val();
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_change_attach",
+		async: false,
+		data: {
+				var_attach: var_attach,
+				id_product: id_product,
+				id_family: id_family,
+				id_category: id_category
+			},
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(obj.status == 1)
+			{
+				if(obj.main_category == 1)
+				{
+					if(type == 0)
+					{
+						$("#results_attach").html(create_alert_msg(strings[obj.text], 1));
+						setTimeout('location.reload()', 1000);
+					}
+					else $("div").data("status_func", 1);
+				}
+				else
+				{
+					if(type == 0) structure_select_main_category(id_product, name_product, name_family, 0);
+					else $("div").data("status_func", -1);
+				}
+			}
+			else
+			{
+				if(type == 0) $("#results_attach").html(create_alert_msg(strings[obj.text], 0));
+				else $("div").data("status_func", 0);
+			}
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_change_attach: " + xhr.status);
+		}
+	});
+}
+
+/* Выборка текущей главной категории для товара с учётом главной категории семейства
+	type = 0 - выборка главной категории после привязки
+	type = 1 - выборка главной категории при удалении связи
+*/
+function structure_select_main_category(id_product, name_product, name_family, type)
+{
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_select_main_category",
+		data: {id_product: id_product},
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			obj.name_product = name_product;
+			obj.name_family = name_family;
+			obj.select.forEach(function(select, i, arr) {
+				if(select['главная_категория'] == 1 && type == 0)
+				{
+					select['selected'] = true;
+				}
+				if(select['главная_категория'] == 1 && type == 1)
+				{
+					select['disabled'] = true;
+				}
+			});
+			get_template( '/template/chunks/structure_main_category.tpl', false);
+			$("#structure_good_main_modal").html(Mustache.render(templates['/template/chunks/structure_main_category.tpl'], obj));
+			$(".save-main-cat").button().on("click", function() {
+				var id_category = $("#good_main").val();
+				structure_save_main_category(id_product, id_category);
+			});
+			$("#structure_good_add_modal").modal("hide");
+			$("body").data("reload", 1);
+			$("#structure_good_main_modal").modal("show");
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_select_main_category: " + xhr.status);
+		}
+	});
+}
+
+// Сохранение выбора главной категории для товара (семейства, куда входит товар)
+function structure_save_main_category(id_product, id_category)
+{
+	$.ajax({
+		type: "POST",
+		url: "/structure/api_save_main_category",
+		data: {id_product: id_product, id_category: id_category},
+		success: function(data) {
+			var obj = $.parseJSON(data);
+			if(obj.status == 1)
+			{
+				$("#results_attach2").html(create_alert_msg(strings[obj.text], 1));
+				setTimeout('location.reload()', 1000);
+			}
+		},
+		error:  function(xhr, str){
+			console.log("Error structure/api_save_main_category: " + xhr.status);
 		}
 	});
 }
@@ -255,13 +493,13 @@ function change_priority_fam_type(id_family, index)
 {
 	$.ajax({
 		type: "POST",
-		url: "/family/api_change_sort_fam",
+		url: "/db_family/api_change_sort_fam",
 		data: {id_family: id_family, index: index},
 		success: function(data) {
 			$(".sort_families").sortable("enable");
 		},
 		error:  function(xhr, str){
-			console.log("Error family/api_change_sort_fam: " + xhr.status);
+			console.log("Error db_family/api_change_sort_fam: " + xhr.status);
 		}
 	});
 }
@@ -274,7 +512,7 @@ function save_family_form(reload = true)
 	var msg = $("#form_family").serialize();
 	$.ajax({
 		type: "POST",
-		url: "/family/api_save_family_form",
+		url: "/db_family/api_save_family_form",
 		async: false,
 		data: msg,
 		success: function(data) {
@@ -282,7 +520,7 @@ function save_family_form(reload = true)
 			if(obj.status == 1)
 			{
 				$("#results_save_family").html(create_alert_msg(strings[obj.text], 1));
-				if(reload == true) setTimeout('location.replace("/family?type='+$("#id_type").val()+'")', 1000);
+				if(reload == true) setTimeout('location.replace("/db_family?type='+$("#id_type").val()+'")', 1000);
 				else $("#parameter2").val(obj.id_family);
 			}
 			else
@@ -293,7 +531,7 @@ function save_family_form(reload = true)
 		},
 		error:  function(xhr, str){
 			$("#results_save_family").html(create_alert_msg(strings['error_connect'], 0));
-			console.log("Error family/api_save_family_form: " + xhr.status);
+			console.log("Error db_family/api_save_family_form: " + xhr.status);
 		}
 	});
 }
@@ -301,18 +539,18 @@ function save_family_form(reload = true)
 /* Групповые операции для семейств
 	action - код групповой операции
 	parameter1 - список семейств или товаров через запятую
-	parameter2 - код семейства для групповой операции с кодом 4, код группы товаров для групповой операции с кодом 5
+	parameter2 - код семейства для групповой операции с кодом 4
 */
 function family_group_operation(action, parameter1, parameter2 = 0)
 {
 	$.ajax({
 		type: "POST",
-		url: "/family/api_family_group_operation",
+		url: "/db_family/api_family_group_operation",
 		data: {action: action, parameter1: parameter1, parameter2: parameter2},
 		success: function(data) {
 			if(data == 1)
 			{
-				setTimeout('location.replace("/family?type='+$("#id_type").val()+'")', 1000);
+				setTimeout('location.replace("/db_family?type='+$("#id_type").val()+'")', 1000);
 			}
 			else
 			{
@@ -320,7 +558,7 @@ function family_group_operation(action, parameter1, parameter2 = 0)
 			}
 		},
 		error:  function(xhr, str){
-			console.log("Error family/api_family_group_operation: " + xhr.status);
+			console.log("Error db_family/api_family_group_operation: " + xhr.status);
 		}
 	});
 }
@@ -367,11 +605,6 @@ function binding_oper_items()
 					data_block = 'item';
 					action = 4;
 				break;
-				case 8: // Если выбран пункт смены группы товаров для выбранных товаров
-					find_block = '[data-checkbox-all="4"][data-family-goods="'+family+'"]:checked';
-					data_block = 'item';
-					action = 6;
-				break;
 			}
 			var parameters = family_select_checkbox('.main', find_block, data_block);
 			if(parameters != '') // Если есть выделенные чекбоксы, то запускаем групповую обработку
@@ -394,7 +627,7 @@ function binding_oper_items()
 					obj.select_attach = true;
 					$.ajax({
 						type: 'POST',
-						url: '/family/api_get_list_families',
+						url: '/db_family/api_get_list_families',
 						async: false,
 						data: {"id_type": obj.id_type},
 						dataType: 'json',
@@ -403,24 +636,7 @@ function binding_oper_items()
 						},
 						error:  function(xhr, str){
 							$("#results_group_oper_family").html(create_alert_msg(strings['fam_error_operation'], 0));
-							console.log("Error family/api_get_list_families: " + xhr.status);
-						}
-					});
-				}
-				else if(var_group == 8)
-				{
-					obj.change_type = true; // Рендерим из шаблона блок с выбором из списка для смены группы товаров
-					$.ajax({
-						type: 'POST',
-						url: '/family/api_get_list_types',
-						async: false,
-						dataType: 'json',
-						success: function(data) {
-							obj.list_types = data; // Получение списка групп товаров
-						},
-						error:  function(xhr, str){
-							$("#results_group_oper_family").html(create_alert_msg(strings['fam_error_operation'], 0));
-							console.log("Error family/api_get_list_types: " + xhr.status);
+							console.log("Error db_family/api_get_list_families: " + xhr.status);
 						}
 					});
 				}
@@ -446,16 +662,8 @@ function binding_oper_items()
 						}
 					});
 				}
-				if(var_group == 8)
-				{
-					$("#parameter2").val($("#list_types").val());
-					$("#list_types").on("change", function() {
-						$("#parameter2").val($("#list_types").val());
-					})
-				}
 				$("#family_main_modal").modal("show");
-				// Биндинг для кнопки "Подтвердить"
-				$(".confirm-family-operation").button().on("click", function() {
+				$(".confirm-family-operation").button().on("click", function() { // Биндинг для кнопки "Подтвердить"
 					$(".confirm-family-operation").html(strings['load_data_process']);
 					$(".confirm-family-operation").attr('disabled','disabled');
 					var action = parseInt($("#action").val());
@@ -468,41 +676,9 @@ function binding_oper_items()
 					}
 					var parameter2 = $("#parameter2").val();
 					var parameter1 = $("#parameter1").val();
-					if(var_group == 8)
-					{
-						if($("#results_group_oper_family").html() == "") type_group_operation(action, parameter1, parameter2); // Если нет сообщения об ошибке, то выполняется групповая операция по смене группы товаров
-						return;
-					}
 					if($("#results_group_oper_family").html() == "") family_group_operation(action, parameter1, parameter2); // Если нет сообщения об ошибке выполняем групповую операцию
 				});
 			}
-		}
-	});
-}
-
-/* Групповые операции для семейств и товаров по смене группы товаров
-	action - код групповой операции
-	parameter1 - список семейств или товаров через запятую
-	parameter2 - код группы товаров
-*/
-function type_group_operation(action, parameter1, parameter2 = 0)
-{
-	$.ajax({
-		type: "POST",
-		url: "/family/api_type_change_operation",
-		data: {action: action, parameter1: parameter1, parameter2: parameter2},
-		success: function(data) {
-			if(data == 1)
-			{
-				setTimeout('location.reload()', 1000);
-			}
-			else
-			{
-				$("#results_group_oper_family").html(create_alert_msg(strings['fam_error_operation'], 0));
-			}
-		},
-		error:  function(xhr, str){
-			console.log("Error family/api_type_change_operation: " + xhr.status);
 		}
 	});
 }

@@ -68,4 +68,3 @@ Class Storage Extends Model
 
 	use traits\procedure;
 }
-?>
