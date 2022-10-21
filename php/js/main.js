@@ -719,4 +719,4 @@ $('.js-data-table').each((index, table) => {
 	let data = $table.data('table');
 
 	$table.DataTable(data);
-})
+});

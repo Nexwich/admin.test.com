@@ -103,14 +103,14 @@
 				</li>
 
 				<li class="sidebar-item">
-					<a href="#exports" class="sidebar-link" data-toggle="collapse" aria-expanded="true">
+					<a href="#storage_export" class="sidebar-link" data-toggle="collapse" aria-expanded="true">
 						<i class="fa fa-archive"></i>
 						Склад
 					</a>
 
-					<ul id="exports" class="sidebar-dropdown list-unstyled collapse">
+					<ul id="storage_export" class="sidebar-dropdown list-unstyled collapse">
 						<li class="sidebar-item">
-							<a href="/export_shipment" class="sidebar-link" id="1">Массовая отгрузка</a>
+							<a href="/export_shipment" class="sidebar-link">Массовая отгрузка</a>
 						</li>
 					</ul>
 				</li>
